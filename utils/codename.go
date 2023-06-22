@@ -37,3 +37,6 @@ func GetCodeName() string {
 	randomIDX := rand.Intn(len(CodeNameList))
 	return CodeNameList[randomIDX]
 }
+
+
+// for now its hardcoded
