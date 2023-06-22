@@ -16,9 +16,21 @@ check_git_repository() {
     fi
 }
 
+check_git_pull() {
+    git fetch origin
+    local_changes=$(git status --porcelain)
+    if [ -n "$local_changes" ]; then
+        echo "There are local changes in the repository. Please commit or discard them before pulling."
+        exit 1
+    fi
+
+    git pull
+    echo "Pull successful."
+}
+
 check_git_changes() {
-    git diff --quiet --exit-code
-    if [ $? -eq 1 ]; then
+    local_changes=$(git status --porcelain)
+    if [ -n "$local_changes" ]; then
         echo "There are changes in the repository."
         read -p "Please enter a commit message: " commit_message
         git commit -am "$commit_message"
@@ -41,4 +53,5 @@ check_git_changes() {
 
 check_git_installed
 check_git_repository
+check_git_pull
 check_git_changes
