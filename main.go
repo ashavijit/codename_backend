@@ -50,19 +50,37 @@ func main() {
 
 	router.GET("/socket.io/*any", gin.WrapH(socketio.SocketIO()))
 
-	router.GET("/codename", func(c *gin.Context) {
+	// router.GET("/codename", func(c *gin.Context) {
+	// 	log.WithFields(log.Fields{
+	// 		"route": "/codename",
+	// 	}).Info("Received GET request")
+	// 	RandomCodeName := utils.GetCodeName()
+	// 	c.JSON(200, gin.H{
+	// 		"codename": RandomCodeName,
+	// 	})
+	// })
+	router.GET("/codename", middlewares.CheckLoggedIn, func(ctx *gin.Context) {
 		log.WithFields(log.Fields{
 			"route": "/codename",
-		}).Info("Received GET request")
+		}).Info(
+			"Received GET request",
+		)
 		RandomCodeName := utils.GetCodeName()
-		c.JSON(200, gin.H{
+		ctx.JSON(200, gin.H{
 			"codename": RandomCodeName,
+		})
+
+	})
+
+	router.POST("/register", middlewares.RegisterNewUsers, func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "User registered successfully",
 		})
 	})
 
-	router.POST("/register",middlewares.RegisterNewUsers, func(c *gin.Context) {
+	router.POST("/login", middlewares.LoginMiddleware, func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
-			"message": "User registered successfully",
+			"message": "User logged in successfully",
 		})
 	})
 

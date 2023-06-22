@@ -47,3 +47,51 @@ func RegisterNewUsers(c *gin.Context) {
 
 	c.Next()
 }
+
+func LoginMiddleware(c *gin.Context){
+	collection := database.GetCollection(CollectionName)
+	var user models.User
+	if err:=c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.Abort()
+		return
+	}
+	filter:=bson.M{"email": user.Email , "password": user.Password}
+	count, err := collection.CountDocuments(context.Background(), filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		c.Abort()
+		return
+	}
+	if count == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.Abort()
+		return
+	}
+
+	c.Next()
+}
+
+func CheckLoggedIn(c *gin.Context){
+	collection := database.GetCollection(CollectionName)
+	var user models.User
+	if err:=c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		c.Abort()
+		return
+	}
+	filter:=bson.M{"email": user.Email , "password": user.Password}
+	count, err := collection.CountDocuments(context.Background(), filter)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		c.Abort()
+		return
+	}
+	if count == 0 {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		c.Abort()
+		return
+	}
+
+	c.Next()
+}

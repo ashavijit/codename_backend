@@ -7,3 +7,13 @@
 {"level":"info","method":"GET","msg":"Received request","path":"/favicon.ico","time":"2023-06-22T13:08:52+05:30"}
 {"level":"info","method":"POST","msg":"Received request","path":"/register","time":"2023-06-22T13:09:05+05:30"}
 {"level":"info","method":"POST","msg":"Received request","path":"/register","time":"2023-06-22T13:09:22+05:30"}
+{"level":"info","method":"POST","msg":"Received request","path":"/login","time":"2023-06-22T17:08:25+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/","time":"2023-06-22T17:14:37+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/favicon.ico","time":"2023-06-22T17:14:37+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/codename","time":"2023-06-22T17:14:42+05:30"}
+{"level":"info","msg":"Received GET request","route":"/codename","time":"2023-06-22T17:14:42+05:30"}
+{"level":"info","method":"POST","msg":"Received request","path":"/login","time":"2023-06-22T17:15:37+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/codename","time":"2023-06-22T17:17:49+05:30"}
+{"level":"info","msg":"Received GET request","route":"/codename","time":"2023-06-22T17:17:49+05:30"}
+{"level":"info","method":"POST","msg":"Received request","path":"/login","time":"2023-06-22T17:19:27+05:30"}
+{"level":"info","method":"POST","msg":"Received request","path":"/login","time":"2023-06-22T17:19:37+05:30"}
