@@ -3,6 +3,7 @@ package main
 import (
 	"codename_backend/database"
 	"codename_backend/socketio"
+	"codename_backend/utils"
 	"io"
 	"os"
 	"path/filepath"
@@ -29,18 +30,34 @@ func main() {
 	log.SetFormatter(&log.JSONFormatter{})
 
 	router := gin.Default()
-	router.GET("/", func(c *gin.Context) {
 
+	// Middleware function for logging
+	router.Use(func(c *gin.Context) {
 		log.WithFields(log.Fields{
-			"route": "/",
-		}).Info("Received GET request")
+			"method": c.Request.Method,
+			"path":   c.Request.URL.Path,
+		}).Info("Received request")
+		c.Next()
+	})
 
+	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "welcome to codename backend",
 		})
 	})
-	router.GET("/socket", gin.WrapH(socketio.SocketIO()))
-	
+
+	router.GET("/socket.io/*any", gin.WrapH(socketio.SocketIO()))
+
+	router.GET("/codename", func(c *gin.Context) {
+		log.WithFields(log.Fields{
+			"route": "/codename",
+		}).Info("Received GET request")
+		RandomCodeName := utils.GetCodeName()
+		c.JSON(200, gin.H{
+			"codename": RandomCodeName,
+		})
+	})
+
 	database.ConnectMongoDB()
 
 	router.Run(":8080")
