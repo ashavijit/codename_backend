@@ -1,0 +1,14 @@
+root = "."
+tmp_dir = "tmp"
+build_dir = "tmp"
+app_port = 8080
+
+[build]
+  cmd = "go build -o {{.BuildPath}} {{.MainFile}}"
+
+[build.exec]
+  pre = ["go mod tidy"]
+
+[[restart]]
+  exts = ["go", "mod", "sum"]
+  cmd = "go run main.go"
