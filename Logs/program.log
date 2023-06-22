@@ -3,3 +3,7 @@
 {"level":"info","msg":"Received GET request","route":"/","time":"2023-06-22T11:49:21+05:30"}
 {"level":"info","msg":"Received GET request","route":"/","time":"2023-06-22T11:58:58+05:30"}
 {"level":"info","msg":"Received GET request","route":"/","time":"2023-06-22T12:00:06+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/","time":"2023-06-22T13:08:52+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/favicon.ico","time":"2023-06-22T13:08:52+05:30"}
+{"level":"info","method":"POST","msg":"Received request","path":"/register","time":"2023-06-22T13:09:05+05:30"}
+{"level":"info","method":"POST","msg":"Received request","path":"/register","time":"2023-06-22T13:09:22+05:30"}

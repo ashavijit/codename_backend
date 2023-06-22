@@ -2,9 +2,11 @@ package main
 
 import (
 	"codename_backend/database"
+	"codename_backend/middlewares"
 	"codename_backend/socketio"
 	"codename_backend/utils"
 	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 
@@ -55,6 +57,12 @@ func main() {
 		RandomCodeName := utils.GetCodeName()
 		c.JSON(200, gin.H{
 			"codename": RandomCodeName,
+		})
+	})
+
+	router.POST("/register",middlewares.RegisterNewUsers, func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "User registered successfully",
 		})
 	})
 
