@@ -84,6 +84,18 @@ func main() {
 		})
 	})
 
+	router.POST("/forget" , middlewares.ResetPassword, func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "OTP sent successfully",
+		})
+	})
+
+	router.POST("/reset", middlewares.VerifyPassword, func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Password reset successfully",
+		})
+	})
+
 	database.ConnectMongoDB()
 
 	router.Run(":8080")
