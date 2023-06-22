@@ -1,0 +1,19 @@
+{
+    "run": {
+        "issues": {
+            "exclude": [
+                "vendor/**"
+            ]
+        },
+        "enable": [
+            "deadcode",
+            "gosimple",
+            "staticcheck",
+            "gofmt",
+            "goimports",
+            "vet",
+            "structcheck",
+            "varcheck"
+        ]
+    }
+}

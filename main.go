@@ -84,7 +84,7 @@ func main() {
 		})
 	})
 
-	router.POST("/forget" , middlewares.ResetPassword, func(c *gin.Context) {
+	router.POST("/forget", middlewares.ResetPassword, func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OTP sent successfully",
 		})
