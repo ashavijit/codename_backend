@@ -1,8 +1,10 @@
 package main
 
 import (
+	"codename_backend/admin"
 	"codename_backend/database"
 	"codename_backend/middlewares"
+	// "codename_backend/routes"
 	"codename_backend/socketio"
 	"codename_backend/utils"
 	"io"
@@ -101,6 +103,10 @@ func main() {
 			"message": "Password changed successfully",
 		})
 	})
+	router.GET("/admin" , admin.GetALLUSERS , func(c *gin.Context) {
+		admin.GetALLUSERS(c)
+	})
+
 	database.ConnectMongoDB()
 
 	router.Run(":8080")

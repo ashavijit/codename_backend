@@ -5,6 +5,8 @@ import (
 	"codename_backend/models"
 	"codename_backend/utils"
 	"context"
+	"regexp"
+
 	// "fmt"
 	"time"
 
@@ -173,6 +175,11 @@ func VerifyPassword(c *gin.Context) {
 		return
 	}
 
+	if (utils.EmailValidate(resetPasswordReqBody.Email)){
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
+		return
+	}
+
 	if resetPasswordReqBody.Email != user.Email {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
 		return
@@ -207,6 +214,12 @@ func ChangePassword(c *gin.Context) {
 	var passwordReqBody PasswordReqBody
 	if err := c.ShouldBindJSON(&passwordReqBody); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	EmailRegEx := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !EmailRegEx.MatchString(passwordReqBody.Email) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
 		return
 	}
 

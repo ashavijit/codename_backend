@@ -1,9 +1,16 @@
 package routes
 
-import "github.com/gin-gonic/gin"
+import (
+	// "codename_backend/admin"
+
+	"github.com/gin-gonic/gin"
+)
 
 
 
 func UserRoutes(router *gin.Engine){
-	// routes to be added here
+	// router.GET("/admin", admin.GetALLUSERS)
+}
+func AdminRoutes(router *gin.Engine){
+	// router.GET("/admin" , admin.GetALLUSERS)
 }
