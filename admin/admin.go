@@ -10,7 +10,7 @@ import (
 )
 
 func GetALLUSERS(c *gin.Context) {
-	collection := database.GetCollection("codename") // Replace "codename" with your collection name
+	collection := database.GetCollection("codename") 
 	cursor, err := collection.Find(context.Background(), bson.M{})
 	if err != nil {
 		c.JSON(500, gin.H{
