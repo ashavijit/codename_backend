@@ -153,8 +153,8 @@ func VerifyPassword(c *gin.Context) {
 		return
 	}
 
-	if user.OTP != user.EnteredOTP || time.Now().Sub(user.OTPTimestamp).Minutes() > 1 {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid OTP"})
+	if user.OTP != user.EnteredOTP || user.OTPTimestamp.Add(time.Minute*5).Before(time.Now()) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OTP"})
 		c.Abort()
 		return
 	}
