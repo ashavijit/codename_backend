@@ -140,29 +140,83 @@ func ResetPassword(c *gin.Context) {
 func VerifyPassword(c *gin.Context) {
 	collection := database.GetCollection(CollectionName)
 	var user models.User
+
+	if err := c.ShouldBindJSON(&user); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	filter := bson.M{"email": user.Email, "otp": user.OTP}
+	err := collection.FindOne(context.Background(), filter).Decode(&user)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+
+	type OTPReqBody struct {
+		OTP         string `json:"otp" binding:"required"`
+		NewPassword string `json:"new_password" binding:"required"`
+	}
+
+	var otpReqBody OTPReqBody
+
+	if err := c.ShouldBindJSON(&otpReqBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	if otpReqBody.OTP != user.OTP {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OTP"})
+		return
+	}
+
+	// Assuming OTPTimestamp is of type time.Time
+	if time.Since(user.OTPTimestamp).Minutes() > 5 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "OTP expired"})
+		return
+	}
+	// update password
+	_, err = collection.UpdateOne(context.Background(), filter, bson.M{"$set": bson.M{"password": otpReqBody.NewPassword}})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+
+	c.Next()
+}
+
+func ChangePassword(c *gin.Context) {
+	collection := database.GetCollection(CollectionName)
+	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		c.Abort()
 		return
 	}
-	filter := bson.M{"email": user.Email, "otp": user.OTP}
+	filter := bson.M{"email": user.Email, "password": user.Password}
 	err := collection.FindOne(context.Background(), filter).Decode(&user)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		c.Abort()
 		return
 	}
+	type NewPasswordReqBody struct {
+		NewPassword string `json:"new_password" binding:"required"`
+	}
 
-	if user.OTP != user.EnteredOTP || user.OTPTimestamp.Add(time.Minute*5).Before(time.Now()) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OTP"})
+	var newPasswordReqBody NewPasswordReqBody
+
+	if err := c.ShouldBindJSON(&newPasswordReqBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
 		c.Abort()
 		return
 	}
-	// fmt.Println(user.OTP, user.EnteredOTP)
+
 	_, err = collection.UpdateOne(
 		context.Background(),
 		filter,
-		bson.M{"$set": bson.M{"password": user.Password}},
+		bson.M{"$set": bson.M{"password": newPasswordReqBody.NewPassword}},
 	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
@@ -170,6 +224,7 @@ func VerifyPassword(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Password reset successful"})
+	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
 	c.Next()
+
 }
