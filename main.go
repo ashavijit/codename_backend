@@ -96,6 +96,11 @@ func main() {
 		})
 	})
 
+	router.POST("/newpwd", middlewares.ChangePassword, func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Password changed successfully",
+		})
+	})
 	database.ConnectMongoDB()
 
 	router.Run(":8080")

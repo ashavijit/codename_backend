@@ -1,6 +1,10 @@
 package utils
 
-import "gopkg.in/gomail.v2"
+import (
+
+	"gopkg.in/gomail.v2"
+)
+
 
 func SendEmail(email string, otp string) error {
 	m := gomail.NewMessage()

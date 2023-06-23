@@ -154,77 +154,82 @@ func VerifyPassword(c *gin.Context) {
 		return
 	}
 
-	type OTPReqBody struct {
-		OTP         string `json:"otp" binding:"required"`
-		NewPassword string `json:"new_password" binding:"required"`
-	}
-
-	var otpReqBody OTPReqBody
-
-	if err := c.ShouldBindJSON(&otpReqBody); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		return
-	}
-
-	if otpReqBody.OTP != user.OTP {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OTP"})
-		return
-	}
-
 	// Assuming OTPTimestamp is of type time.Time
 	if time.Since(user.OTPTimestamp).Minutes() > 5 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "OTP expired"})
 		return
 	}
-	// update password
-	_, err = collection.UpdateOne(context.Background(), filter, bson.M{"$set": bson.M{"password": otpReqBody.NewPassword}})
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		return
-	}
 
-	c.Next()
-}
-
-func ChangePassword(c *gin.Context) {
-	collection := database.GetCollection(CollectionName)
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		c.Abort()
-		return
-	}
-	filter := bson.M{"email": user.Email, "password": user.Password}
-	err := collection.FindOne(context.Background(), filter).Decode(&user)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		c.Abort()
-		return
-	}
-	type NewPasswordReqBody struct {
+	type ResetPasswordReqBody struct {
+		Email       string `json:"email" binding:"required"`
+		OTP         string `json:"otp" binding:"required"`
 		NewPassword string `json:"new_password" binding:"required"`
 	}
 
-	var newPasswordReqBody NewPasswordReqBody
+	var resetPasswordReqBody ResetPasswordReqBody
 
-	if err := c.ShouldBindJSON(&newPasswordReqBody); err != nil {
+	if err := c.ShouldBindJSON(&resetPasswordReqBody); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
-		c.Abort()
 		return
 	}
 
-	_, err = collection.UpdateOne(
-		context.Background(),
-		filter,
-		bson.M{"$set": bson.M{"password": newPasswordReqBody.NewPassword}},
-	)
+	if resetPasswordReqBody.Email != user.Email {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
+		return
+	}
+
+	if resetPasswordReqBody.OTP != user.OTP {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OTP"})
+		return
+	}
+
+	// Update password
+	update := bson.M{"$set": bson.M{"password": resetPasswordReqBody.NewPassword}}
+	_, err = collection.UpdateOne(context.Background(), filter, update)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		c.Abort()
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Password reset successfully"})
+}
+
+
+func ChangePassword(c *gin.Context) {
+	collection := database.GetCollection(CollectionName)
+
+	type PasswordReqBody struct {
+		Email        string `json:"email" binding:"required"`
+		OldPassword  string `json:"old_password" binding:"required"`
+		NewPassword  string `json:"new_password" binding:"required"`
+	}
+
+	var passwordReqBody PasswordReqBody
+	if err := c.ShouldBindJSON(&passwordReqBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	filter := bson.M{"email": passwordReqBody.Email}
+	var user models.User
+	err := collection.FindOne(context.Background(), filter).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		return
+	}
+
+	if passwordReqBody.OldPassword != user.Password {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
+		return
+	}
+
+	update := bson.M{"$set": bson.M{"password": passwordReqBody.NewPassword}}
+	_, err = collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
-	c.Next()
-
 }
+
