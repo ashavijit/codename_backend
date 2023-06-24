@@ -111,6 +111,12 @@ func main() {
 		admin.GetASingleUserFromID(c)
 	})
 
+	router.POST("/changeusername" , middlewares.UserNameChange , func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "Username changed successfully",
+		})
+	})
+
 	database.ConnectMongoDB()
 
 	router.Run(":8080")

@@ -246,3 +246,55 @@ func ChangePassword(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})
 }
 
+func UserNameChange(c *gin.Context) {
+	collection := database.GetCollection(CollectionName)
+
+	type UserNameReqBody struct {
+		Email       string `json:"email" binding:"required"`
+		NewUserName string `json:"new_username" binding:"required"`
+		Password    string `json:"password" binding:"required"`
+	}
+
+	var userNameReqBody UserNameReqBody
+	if err := c.ShouldBindJSON(&userNameReqBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(userNameReqBody.Email) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
+		return
+	}
+
+	findUser := bson.M{"email": userNameReqBody.Email, "password": userNameReqBody.Password}
+	var user models.User
+	err := collection.FindOne(context.Background(), findUser).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found or database error"})
+		return
+	}
+
+	if user.Username == userNameReqBody.NewUserName {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "New username is the same as the current username"})
+		return
+	}
+
+	updateUserName := bson.M{"$set": bson.M{"username": userNameReqBody.NewUserName}}
+	_, err = collection.UpdateOne(context.Background(), findUser, updateUserName)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update username"})
+		return
+	}
+
+	c.Next()	
+}
+
+
+
+
+
+
+
+
+
