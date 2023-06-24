@@ -61,7 +61,7 @@ func main() {
 	// 		"codename": RandomCodeName,
 	// 	})
 	// })
-	router.GET("/codename", middlewares.CheckLoggedIn, func(ctx *gin.Context) {
+	router.GET("/codename", func(ctx *gin.Context) {
 		log.WithFields(log.Fields{
 			"route": "/codename",
 		}).Info(
@@ -105,6 +105,10 @@ func main() {
 	})
 	router.GET("/admin" , admin.GetALLUSERS , func(c *gin.Context) {
 		admin.GetALLUSERS(c)
+	})
+
+	router.GET("/admin/:id" , admin.GetASingleUserFromID , func(c *gin.Context) {
+		admin.GetASingleUserFromID(c)
 	})
 
 	database.ConnectMongoDB()

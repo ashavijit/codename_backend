@@ -46,3 +46,15 @@ func GetALLUSERS(c *gin.Context) {
 
 	c.JSON(200, users)
 }
+
+func GetASingleUserFromID(c *gin.Context) {
+	collection := database.GetCollection(CollectionName)
+	var user models.User
+	if err := collection.FindOne(context.Background(), bson.M{"_id": c.Param("id")}).Decode(&user); err != nil {
+		c.JSON(500, gin.H{
+			"message": "Something went wrong",
+		})
+		return
+	}
+	c.JSON(200, user)
+}
