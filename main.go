@@ -107,9 +107,9 @@ func main() {
 		admin.GetALLUSERS(c)
 	})
 
-	router.GET("/admin/:id" , admin.GetASingleUserFromID , func(c *gin.Context) {
-		admin.GetASingleUserFromID(c)
-	})
+	// router.POST("/id" , admin.GetASingleUserFromID , func(c *gin.Context) {
+	// 	admin.GetASingleUserFromID(c)
+	// })
 
 	router.POST("/changeusername" , middlewares.UserNameChange , func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{

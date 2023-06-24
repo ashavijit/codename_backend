@@ -48,8 +48,15 @@ func GetALLUSERS(c *gin.Context) {
 		return
 	}
 
+	if len(users) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "No users found",
+		})
+		return
+	}
+
 	currentTimestamp := time.Now().Format("2006-01-02_15-04-05")
-	fileName := "users_" + currentTimestamp + ".json"
+	fileName := "data/" + "users_" + currentTimestamp + ".json"
 	data, err := json.Marshal(users)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -69,16 +76,52 @@ func GetALLUSERS(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-func GetASingleUserFromID(c *gin.Context) {
+// func GetASingleUserFromID(c *gin.Context) {
+// 	collection := database.GetCollection(CollectionName)
+// 	var user models.User
+// 	type IDReq struct {
+// 		ID string `json:"id"`
+// 	}
+// 	var idReq IDReq
+// 	err := c.BindJSON(&idReq)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{
+// 			"message": "Invalid request",
+// 		})
+// 		return
+// 	}
+// 	err = collection.FindOne(context.Background(), bson.M{"id": idReq.ID}).Decode(&user)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{
+// 			"message": "Invalid request",
+// 		})
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, user)
+// 	c.Next()
+// }
+
+// count new users todayUser - yesterdayUser
+
+func NewUsers( c *gin.Context) {
 	collection := database.GetCollection(CollectionName)
-	var user models.User
-	if err := collection.FindOne(context.Background(), bson.M{"_id": c.Param("id")}).Decode(&user); err != nil {
-		c.JSON(500, gin.H{
+	var users models.User
+	yesterdayUser := collection.FindOne(context.Background(), bson.M{"created_at": time.Now().AddDate(0, 0, -1).Format("2006-01-02")})
+	todayUser := collection.FindOne(context.Background(), bson.M{"created_at": time.Now().Format("2006-01-02")})
+	if err := yesterdayUser.Decode(&users); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Something went wrong",
 		})
 		return
 	}
-	c.JSON(200, user)
-
-	c.Next()
+	if err := todayUser.Decode(&users); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Something went wrong",
+		})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"yesterdayUser": users,
+		"todayUser": users,
+	})
 }
