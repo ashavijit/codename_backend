@@ -118,6 +118,7 @@ func main() {
 	})
 
 	database.ConnectMongoDB()
+	database.ConnectRedisDB()
 
 	router.Run(":8080")
 }

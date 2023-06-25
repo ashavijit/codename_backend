@@ -5,6 +5,7 @@ import (
 	"codename_backend/models"
 	"codename_backend/utils"
 	"context"
+	// "fmt"
 	"regexp"
 
 	// "fmt"
@@ -14,6 +15,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-redis/redis/v8"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
@@ -21,33 +23,48 @@ const (
 	DB_NAME        = "codename"
 	CollectionName = "users"
 )
+var rdb *redis.Client
+
+func init() {
+	rdb = redis.NewClient(&redis.Options{
+		Addr:     "redis-10351.c114.us-east-1-4.ec2.cloud.redislabs.com:10351",
+		Password: "QIqrMPlHJJ8UuhFjr936khTiJwPE3ChP",
+		DB:       0,
+	})
+}
 
 func RegisterNewUsers(c *gin.Context) {
 	collection := database.GetCollection(CollectionName)
+
 	var user models.User
 	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
-		c.Abort()
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	filter := bson.M{"email": user.Email}
 	count, err := collection.CountDocuments(context.Background(), filter)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
-		c.Abort()
 		return
 	}
 	if count > 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "User already exists"})
-		c.Abort()
+		return
+	}
+
+	err = rdb.Set(context.Background(), user.Email, user.Password, 0).Err()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Redis error"})
 		return
 	}
 
 	// Insert the user into the database
-	_, err = collection.InsertOne(context.Background(), user)
+	_, err = collection.InsertOne(context.Background(), &user)
 	if err != nil {
+		// Remove user from Redis if the database insertion fails
+		rdb.Del(context.Background(), user.Email)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to register user"})
-		c.Abort()
 		return
 	}
 
@@ -288,6 +305,56 @@ func UserNameChange(c *gin.Context) {
 	}
 
 	c.Next()	
+}
+
+func UserEmailChange(c *gin.Context) {
+	collection := database.GetCollection(CollectionName)
+
+	type UserEmailReqBody struct {
+		Email       string `json:"email" binding:"required"`
+		NewEmail    string `json:"new_email" binding:"required"`
+		Password    string `json:"password" binding:"required"`
+	}
+
+	var userEmailReqBody UserEmailReqBody
+	if err := c.ShouldBindJSON(&userEmailReqBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(userEmailReqBody.Email) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
+		return
+	}
+
+	FindUser := bson.M{"email": userEmailReqBody.Email, "password": userEmailReqBody.Password}
+	var user models.User
+	err := collection.FindOne(context.Background(), FindUser).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found or database error"})
+		return
+	}
+	// check for password match
+	if user.Password != userEmailReqBody.Password {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password"})
+		return
+	}
+
+	if user.Email == userEmailReqBody.NewEmail {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "New email is the same as the current email"})
+		return
+	}
+
+	updateEmail := bson.M{"$set": bson.M{"email": userEmailReqBody.NewEmail}}
+
+	_, err = collection.UpdateOne(context.Background(), FindUser, updateEmail)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update email"})
+		return
+	}
+
+	c.Next()
 }
 
 
