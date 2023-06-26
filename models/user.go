@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/dgrijalva/jwt-go"
+)
 
 type User struct {
 	Id           string    `json:"id,omitempty"`
@@ -17,4 +21,10 @@ type User struct {
 type CodeName struct {
 	Username string `json:"username,omitempty"`
 	Codename string `json:"codename,omitempty"`
+}
+
+type signedDetails struct {
+	Email string
+	uid   string
+	jwt.StandardClaims
 }
