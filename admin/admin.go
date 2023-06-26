@@ -103,25 +103,33 @@ func GetALLUSERS(c *gin.Context) {
 
 // count new users todayUser - yesterdayUser
 
-func NewUsers( c *gin.Context) {
+func NewUsers(c *gin.Context) {
 	collection := database.GetCollection(CollectionName)
-	var users models.User
+	var usersYesterday models.User
+	var usersToday models.User
+
 	yesterdayUser := collection.FindOne(context.Background(), bson.M{"created_at": time.Now().AddDate(0, 0, -1).Format("2006-01-02")})
 	todayUser := collection.FindOne(context.Background(), bson.M{"created_at": time.Now().Format("2006-01-02")})
-	if err := yesterdayUser.Decode(&users); err != nil {
+
+	if err := yesterdayUser.Decode(&usersYesterday); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Something went wrong",
 		})
 		return
 	}
-	if err := todayUser.Decode(&users); err != nil {
+
+	if err := todayUser.Decode(&usersToday); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"message": "Something went wrong",
 		})
 		return
 	}
+
+	// newUser := len(usersToday) - len(usersYesterday)
+
 	c.JSON(http.StatusOK, gin.H{
-		"yesterdayUser": users,
-		"todayUser": users,
+		"yesterdayUser": usersYesterday,
+		"todayUser":     usersToday,
+		// "newUser":       newUser,
 	})
 }

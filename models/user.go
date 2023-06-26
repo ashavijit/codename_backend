@@ -15,7 +15,6 @@ type User struct {
 	OTP          string    `json:"otp,omitempty"`
 	OTPTimestamp time.Time `json:"otpTimestamp,omitempty"`
 	EnteredOTP   string    `json:"enteredOtp,omitempty"`
-	created_at   time.Time `json:"created_at,omitempty"`
 }
 
 type CodeName struct {

@@ -116,7 +116,9 @@ func main() {
 			"message": "Username changed successfully",
 		})
 	})
-
+	router.GET("/newuser" , admin.NewUsers , func(c *gin.Context) {
+		admin.NewUsers(c)
+	})
 	database.ConnectMongoDB()
 	database.ConnectRedisDB()
 

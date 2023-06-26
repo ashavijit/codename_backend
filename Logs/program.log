@@ -151,3 +151,7 @@
 {"level":"info","method":"POST","msg":"Received request","path":"/register","time":"2023-06-25T21:16:04+05:30"}
 {"level":"info","method":"POST","msg":"Received request","path":"/register","time":"2023-06-25T21:16:06+05:30"}
 {"level":"info","method":"POST","msg":"Received request","path":"/register","time":"2023-06-25T21:16:09+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/","time":"2023-06-26T23:06:09+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/favicon.ico","time":"2023-06-26T23:06:10+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/newusers","time":"2023-06-26T23:06:16+05:30"}
+{"level":"info","method":"GET","msg":"Received request","path":"/newuser","time":"2023-06-26T23:06:23+05:30"}
