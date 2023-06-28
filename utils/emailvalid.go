@@ -10,3 +10,4 @@ func EmailValidate(email string) bool {
 	}
 	return true
 } 
+

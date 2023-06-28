@@ -357,6 +357,47 @@ func UserEmailChange(c *gin.Context) {
 	c.Next()
 }
 
+func UserDelete(c *gin.Context) {
+	collection := database.GetCollection(CollectionName)
+
+	type UserDeleteReqBody struct {
+		Email       string `json:"email" binding:"required"`
+		Password    string `json:"password" binding:"required"`
+	}
+
+	var userDeleteReqBody UserDeleteReqBody
+	if err := c.ShouldBindJSON(&userDeleteReqBody); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+		return
+	}
+
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`)
+	if !emailRegex.MatchString(userDeleteReqBody.Email) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
+		return
+	}
+
+	FindUser := bson.M{"email": userDeleteReqBody.Email, "password": userDeleteReqBody.Password}
+	var user models.User
+	err := collection.FindOne(context.Background(), FindUser).Decode(&user)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "User not found or database error"})
+		return
+	}
+	// check for password match
+	if user.Password != userDeleteReqBody.Password {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password"})
+		return
+	}
+
+	_, err = collection.DeleteOne(context.Background(), FindUser)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete user"})
+		return
+	}
+
+	c.Next()
+}
 
 
 
