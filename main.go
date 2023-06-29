@@ -89,7 +89,7 @@ func main() {
 		})
 	})
 
-	router.POST("/forget",authOk, middlewares.ResetPassword, func(c *gin.Context) {
+	router.POST("/forget", authOk, middlewares.ResetPassword, func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "OTP sent successfully",
 		})
@@ -106,7 +106,7 @@ func main() {
 			"message": "Password changed successfully",
 		})
 	})
-	router.GET("/admin" , auth.JWT_BASIC_AUTH(), admin.GetALLUSERS , func(c *gin.Context) {
+	router.GET("/admin", auth.JWT_BASIC_AUTH(), admin.GetALLUSERS, func(c *gin.Context) {
 		admin.GetALLUSERS(c)
 	})
 
@@ -114,26 +114,31 @@ func main() {
 	// 	admin.GetASingleUserFromID(c)
 	// })
 
-	router.POST("/changeusername" , middlewares.UserNameChange , func(c *gin.Context) {
+	router.POST("/changeusername", middlewares.UserNameChange, func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "Username changed successfully",
 		})
 	})
-	router.GET("/newuser" , admin.NewUsers , func(c *gin.Context) {
+	router.GET("/newuser", admin.NewUsers, func(c *gin.Context) {
 		admin.NewUsers(c)
 	})
 
-	router.POST("/deleteuser" , middlewares.UserDelete , func(c *gin.Context) {
+	router.POST("/deleteuser", middlewares.UserDelete, func(c *gin.Context) {
 		middlewares.UserDelete(c)
 	})
 	database.ConnectMongoDB()
 	database.ConnectRedisDB()
 	// JWT Generation
-	 TOKEN , err := auth.GenerateJWT("admin")
-	 if err != nil {
-		 log.Fatal("Failed to generate JWT: ", err)
-	 }
-	 log.Info("JWT: ", TOKEN)
+	TOKEN, err := auth.GenerateJWT("admin")
+	if err != nil {
+		log.Fatal("Failed to generate JWT: ", err)
+	}
+	log.Info("JWT: ", TOKEN)
+	// save the token in a file for later use
+	err = os.WriteFile("token/token.txt", []byte("Bearer" + " " + TOKEN), 0644)
+	if err != nil {
+		log.Fatal("Failed to save JWT: ", err)
+	}
 
 	router.Run(":8080")
 }

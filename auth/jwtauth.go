@@ -1,22 +1,28 @@
 package auth
 
 import (
+	"os"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
 
-var JWT_SECRET = []byte("codename_backend")
+var JWT_SECRET = []byte(os.Getenv("JWT_SECRET"))
 
 type Claims struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
 
-func GenerateJWT(username string) (string , error){
-	claims:= &Claims{
+func GenerateJWT(username string) (string, error) {
+	if username == "" {
+		return "", nil
+	}
+	claims := &Claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: 15000, // 15 seconds
+			ExpiresAt: time.Now().Add(1 * time.Minute).Unix(),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -29,7 +35,7 @@ func GenerateJWT(username string) (string , error){
 }
 
 func VerifyJWT(tokenString string) (*Claims, error) {
-	token , err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return JWT_SECRET, nil
 	})
 	if err != nil {
@@ -37,7 +43,7 @@ func VerifyJWT(tokenString string) (*Claims, error) {
 	}
 	claims, ok := token.Claims.(*Claims)
 	if !ok {
-		return nil , err
+		return nil, err
 	}
 	return claims, nil
 }
@@ -52,7 +58,7 @@ func JWT_BASIC_AUTH() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		tokenString := authHeader[7:] // remove "Bearer " from the header
+		tokenString := authHeader[len("Bearer "):]
 		claims, err := VerifyJWT(tokenString)
 		if err != nil {
 			ctx.JSON(401, gin.H{
