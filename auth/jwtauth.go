@@ -22,7 +22,7 @@ func GenerateJWT(username string) (string, error) {
 	claims := &Claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(1 * time.Minute).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour * 24 * 7).Unix(), // 1 week
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -70,4 +70,15 @@ func JWT_BASIC_AUTH() gin.HandlerFunc {
 		ctx.Header("username", claims.Username)
 		ctx.Next()
 	}
+}
+
+func CHECK_ONE_WEEK_EXPIRY(tokenString string) bool {
+	claims, err := VerifyJWT(tokenString)
+	if err != nil {
+		return false
+	}
+	if claims.ExpiresAt < time.Now().Unix() {
+		return false
+	}
+	return true
 }

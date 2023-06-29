@@ -5,6 +5,9 @@ import (
 	"codename_backend/auth"
 	"codename_backend/database"
 	"codename_backend/middlewares"
+	"encoding/json"
+	// "go/token"
+	"io/ioutil"
 
 	// "codename_backend/routes"
 	"codename_backend/socketio"
@@ -128,16 +131,38 @@ func main() {
 	})
 	database.ConnectMongoDB()
 	database.ConnectRedisDB()
-	// JWT Generation
-	TOKEN, err := auth.GenerateJWT("admin")
-	if err != nil {
-		log.Fatal("Failed to generate JWT: ", err)
-	}
-	log.Info("JWT: ", TOKEN)
-	// save the token in a file for later use
-	err = os.WriteFile("token/token.txt", []byte("Bearer" + " " + TOKEN), 0644)
-	if err != nil {
-		log.Fatal("Failed to save JWT: ", err)
+
+
+
+	// JWT PART -------------------------------------------------------------------------------------------------- //
+
+	_,err = os.Stat("token/token.json")
+	if os.IsNotExist(err) {
+		log.Fatal("Token file not found")
+	} else {
+		OLD_TOKEN , err := ioutil.ReadFile("token/token.json")
+		if err == nil {
+			var data map[string]string
+			err = json.Unmarshal(OLD_TOKEN, &data)
+			if err == nil {
+				if (!auth.CHECK_ONE_WEEK_EXPIRY(data["JWT"])) {
+					log.Info("JWT token expired")
+					log.Info("Generating new JWT token")
+					token , err:= auth.GenerateJWT("admin")
+					if err != nil {
+						log.Fatal("Failed to generate new JWT token")
+					}
+					log.Info("New JWT token generated")
+					log.Info("Writing new JWT token to file")
+					data["JWT"] = token
+					file, _ := json.MarshalIndent(data, "", " ")
+					_ = ioutil.WriteFile("token/token.json", file, 0644)
+					log.Info("New JWT token written to file")
+				} else {
+					log.Info("JWT token not expired")
+				}
+			}
+		}
 	}
 
 	router.Run(":8080")
