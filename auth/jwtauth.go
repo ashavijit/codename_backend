@@ -73,12 +73,13 @@ func JWT_BASIC_AUTH() gin.HandlerFunc {
 }
 
 func CHECK_ONE_WEEK_EXPIRY(tokenString string) bool {
+	// check if token is valid and not expired by comparing the expiry time with the current time
 	claims, err := VerifyJWT(tokenString)
 	if err != nil {
 		return false
 	}
-	if claims.ExpiresAt < time.Now().Unix() {
-		return false
+	if claims.ExpiresAt < time.Now().AddDate(0, 0, 7).Unix() {
+		return true
 	}
-	return true
+	return false
 }

@@ -1,8 +1,5 @@
 import { google, sheets_v4 } from "googleapis";
 import serviceAccountKeyFile from "../keys.json"
-const sheetId = '19nwije38ve_YkzMkwY8lmDr7jKkjnXUSN6K4KFGey3s'
-const tabName = 'codename_app'
-const range = "A:E"
   
   async function _getGoogleSheetClient() {
     const auth = new google.auth.GoogleAuth({
@@ -37,3 +34,5 @@ const range = "A:E"
   
     return res.data;
   }
+
+  export {_getGoogleSheetClient, _readGoogleSheet, _writeGoogleSheet}
