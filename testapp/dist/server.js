@@ -23,7 +23,7 @@ app.use(express_1.default.urlencoded({ extended: true }));
 const URL = "http://localhost:8080/admin";
 const headers = {
     "Content-Type": "application/json",
-    Authorization: TOKEN, //the token is a variable which holds the token
+    Authorization: TOKEN,
 };
 app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     return res.status(200).send({
@@ -32,8 +32,15 @@ app.get("/", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 app.get("/admin", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const response = yield axios_1.default.get(URL, { headers: headers });
+        const response = yield axios_1.default.get(URL, { headers });
+        if (response.status === 400) {
+            return res.status(400).json({ error: "Bad Request" });
+        }
+        else if (response.status === 401) {
+            return res.status(401).json({ error: "Unauthorized" });
+        }
         return res.status(200).json(response.data);
+        // save the data to excel sheet
     }
     catch (error) {
         console.error("Error fetching data:", error);
