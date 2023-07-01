@@ -1,14 +1,16 @@
-"use strict";
+'use strict';
 // import express, { Application, Request, Response } from "express";
 // import { google, sheets_v4 } from "googleapis";
 // import axios from "axios";
 // import {_getGoogleSheetClient , _readGoogleSheet, _writeGoogleSheet} from "./lib/sheets"
 // import {parse} from "json2csv"
 // import * as fs from "fs";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
+var __importDefault =
+      (this && this.__importDefault) ||
+      function (mod) {
+            return mod && mod.__esModule ? mod : { default: mod };
+      };
+Object.defineProperty(exports, '__esModule', { value: true });
 // const app: Application = express();
 // const port = 3000;
 // var TOKEN =
@@ -82,41 +84,50 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // } catch (error) {
 //   console.error(`Error occured`);
 // }
-const express_1 = __importDefault(require("express"));
-const axios_1 = __importDefault(require("axios"));
+const express_1 = __importDefault(require('express'));
+const axios_1 = __importDefault(require('axios'));
 const app = (0, express_1.default)();
 const port = 3000;
-const TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjg4NjY2OTYwfQ.gKygcoudX2sDXo54kPCTXNnJtiwUczviCSmhgJqtAU4";
-const URL = "http://localhost:8080/admin";
-const sheetId = "19nwije38ve_YkzMkwY8lmDr7jKkjnXUSN6K4KFGey3s";
-const tabName = "Sheet2";
-const range = "A1:F6";
+const TOKEN =
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjg4NjY2OTYwfQ.gKygcoudX2sDXo54kPCTXNnJtiwUczviCSmhgJqtAU4';
+const URL = 'http://localhost:8080/admin';
+const sheetId = '19nwije38ve_YkzMkwY8lmDr7jKkjnXUSN6K4KFGey3s';
+const tabName = 'Sheet2';
+const range = 'A1:F6';
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
-app.get("/", async (req, res) => {
-    return res.status(200).send({
-        message: "Hello World!",
-    });
+app.get('/', async (req, res) => {
+      return res.status(200).send({
+            message: 'Hello World!',
+      });
 });
-app.get("/admin", async (req, res) => {
-    try {
-        const response = await axios_1.default.get(URL, { headers: { Authorization: TOKEN } });
-        if (response.status === 400) {
-            return res.status(400).json({ error: "Bad Request" });
-        }
-        else if (response.status === 401) {
-            return res.status(401).json({ error: "Unauthorized" });
-        }
-        const JSONDATA = JSON.parse(JSON.stringify(response.data));
-        console.log(JSONDATA);
-        const fields = Object.keys(JSONDATA["username"][0]);
-        console.log(fields);
-    }
-    catch (error) {
-        console.log(error);
-        return res.status(500).json({ error: "Internal Server Error" });
-    }
+app.get('/admin', async (req, res) => {
+      try {
+            const response = await axios_1.default.get(URL, {
+                  headers: { Authorization: TOKEN },
+            });
+            if (response.status === 400) {
+                  return res
+                        .status(400)
+                        .json({ error: 'Bad Request' });
+            } else if (response.status === 401) {
+                  return res
+                        .status(401)
+                        .json({ error: 'Unauthorized' });
+            }
+            const JSONDATA = JSON.parse(
+                  JSON.stringify(response.data)
+            );
+            console.log(JSONDATA);
+            const fields = Object.keys(JSONDATA['username'][0]);
+            console.log(fields);
+      } catch (error) {
+            console.log(error);
+            return res
+                  .status(500)
+                  .json({ error: 'Internal Server Error' });
+      }
 });
 app.listen(port, () => {
-    console.log(`Connected successfully on port ${port}`);
+      console.log(`Connected successfully on port ${port}`);
 });

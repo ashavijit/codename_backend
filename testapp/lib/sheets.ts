@@ -1,52 +1,79 @@
-import { google, sheets_v4 } from "googleapis";
-import serviceAccountKeyFile from "../keys.json"
-  
-  async function _getGoogleSheetClient() {
-    const auth = new google.auth.GoogleAuth({
-      credentials: serviceAccountKeyFile,
-      scopes: ['https://www.googleapis.com/auth/spreadsheets'],
-    });
-    const authClient = await auth.getClient();
-    return google.sheets({
-      version: 'v4',
-      auth: authClient,
-    });
-  }
-  
-  async function _readGoogleSheet(googleSheetClient: sheets_v4.Sheets, sheetId: string, tabName: string, range: string) {
-    const res = await googleSheetClient.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: `${tabName}!${range}`,
-    });
-  
-    return res.data.values;
-  }
-  
-  async function _writeGoogleSheet(googleSheetClient: sheets_v4.Sheets, sheetId: string, tabName: string, range: string, data: any[]) {
-    const res = await googleSheetClient.spreadsheets.values.append({
-      spreadsheetId: sheetId,
-      range: `${tabName}!${range}`,
-      valueInputOption: 'USER_ENTERED',
-      requestBody: {
-        values: data,
-      },
-    });
-  
-    return res.data;
-  }
+import { google, sheets_v4 } from 'googleapis';
+import serviceAccountKeyFile from '../keys.json';
 
-  async function _getExistingSheetData(googleSheetClient: sheets_v4.Sheets, sheetId: string, tabName: string, range: string) {
-    const res = await googleSheetClient.spreadsheets.values.get({
-      spreadsheetId: sheetId,
-      range: `${tabName}!${range}`,
-    });
-  }
+async function _getGoogleSheetClient() {
+      const auth = new google.auth.GoogleAuth({
+            credentials: serviceAccountKeyFile,
+            scopes: ['https://www.googleapis.com/auth/spreadsheets'],
+      });
+      const authClient = await auth.getClient();
+      return google.sheets({
+            version: 'v4',
+            auth: authClient,
+      });
+}
 
-  async function _clearGoogleSheetData(googleSheetClient: sheets_v4.Sheets, sheetId: string, tabName: string, range: string) {
-    const res = await googleSheetClient.spreadsheets.values.clear({
-      spreadsheetId: sheetId,
-      range: `${tabName}!${range}`,
-    });
-  }
+async function _readGoogleSheet(
+      googleSheetClient: sheets_v4.Sheets,
+      sheetId: string,
+      tabName: string,
+      range: string
+) {
+      const res = await googleSheetClient.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: `${tabName}!${range}`,
+      });
 
-  export {_getGoogleSheetClient, _readGoogleSheet, _writeGoogleSheet, _getExistingSheetData , _clearGoogleSheetData }
+      return res.data.values;
+}
+
+async function _writeGoogleSheet(
+      googleSheetClient: sheets_v4.Sheets,
+      sheetId: string,
+      tabName: string,
+      range: string,
+      data: any[]
+) {
+      const res = await googleSheetClient.spreadsheets.values.append({
+            spreadsheetId: sheetId,
+            range: `${tabName}!${range}`,
+            valueInputOption: 'USER_ENTERED',
+            requestBody: {
+                  values: data,
+            },
+      });
+
+      return res.data;
+}
+
+async function _getExistingSheetData(
+      googleSheetClient: sheets_v4.Sheets,
+      sheetId: string,
+      tabName: string,
+      range: string
+) {
+      const res = await googleSheetClient.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: `${tabName}!${range}`,
+      });
+}
+
+async function _clearGoogleSheetData(
+      googleSheetClient: sheets_v4.Sheets,
+      sheetId: string,
+      tabName: string,
+      range: string
+) {
+      const res = await googleSheetClient.spreadsheets.values.clear({
+            spreadsheetId: sheetId,
+            range: `${tabName}!${range}`,
+      });
+}
+
+export {
+      _getGoogleSheetClient,
+      _readGoogleSheet,
+      _writeGoogleSheet,
+      _getExistingSheetData,
+      _clearGoogleSheetData,
+};

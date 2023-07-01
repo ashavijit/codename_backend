@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strings"
+
 	// "strings"
 	"time"
 
@@ -66,22 +68,33 @@ func GetALLUSERS(c *gin.Context) {
 		})
 		return
 	}
-	// check file for today exist or not if exist then delete or dont write
-	checkfile , err := ioutil.ReadDir("data/" + "users_" + currentTimestamp + ".json")
+	files, err := ioutil.ReadDir("data")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to read file",
+			"message": "Failed to read directory",
 		})
 		return
 	}
-	if len(checkfile) != 0 {
-		err = os.Remove("data/" + "users_" + currentTimestamp + ".json")
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"message": "Failed to remove file",
-			})
-			return
+
+	currentDate := time.Now().Format("2006-01-02")
+	for _, file := range files {
+		if strings.Contains(file.Name(), "users_"+currentDate) && strings.HasSuffix(file.Name(), ".json") {
+			err := os.Remove("data/" + file.Name())
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"message": "Failed to remove file",
+				})
+				return
+			}
 		}
+	}
+
+	data, err = json.Marshal(users)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to marshal data",
+		})
+		return
 	}
 	err = ioutil.WriteFile(fileName, data, 0644)
 	if err != nil {
@@ -90,6 +103,10 @@ func GetALLUSERS(c *gin.Context) {
 		})
 		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"users": users,
+	})
 }
 
 // func GetASingleUserFromID(c *gin.Context) {

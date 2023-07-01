@@ -6,6 +6,7 @@ import (
 	"codename_backend/database"
 	"codename_backend/middlewares"
 	"encoding/json"
+
 	// "go/token"
 	"io/ioutil"
 
@@ -109,7 +110,7 @@ func main() {
 			"message": "Password changed successfully",
 		})
 	})
-	router.GET("/admin", auth.JWT_BASIC_AUTH() , admin.GetALLUSERS, func(c *gin.Context) {
+	router.GET("/admin", auth.JWT_BASIC_AUTH(), admin.GetALLUSERS, func(c *gin.Context) {
 		admin.GetALLUSERS(c)
 	})
 
@@ -132,28 +133,24 @@ func main() {
 
 	// database PART ---------------------------------------------------------------------------------------------//
 
-
-
 	database.ConnectMongoDB()
 	database.ConnectRedisDB()
 
-
-
 	// JWT PART -------------------------------------------------------------------------------------------------- //
 
-	_,err = os.Stat("token/token.json")
+	_, err = os.Stat("token/token.json")
 	if os.IsNotExist(err) {
 		log.Fatal("Token file not found")
 	} else {
-		OLD_TOKEN , err := ioutil.ReadFile("token/token.json")
+		OLD_TOKEN, err := ioutil.ReadFile("token/token.json")
 		if err == nil {
 			var data map[string]string
 			err = json.Unmarshal(OLD_TOKEN, &data)
 			if err == nil {
-				if (!auth.CHECK_ONE_WEEK_EXPIRY(data["JWT"])) {
+				if !auth.CHECK_ONE_WEEK_EXPIRY(data["JWT"]) {
 					log.Info("JWT token expired")
 					log.Info("Generating new JWT token")
-					token , err:= auth.GenerateJWT("admin")
+					token, err := auth.GenerateJWT("admin")
 					if err != nil {
 						log.Fatal("Failed to generate new JWT token")
 					}
