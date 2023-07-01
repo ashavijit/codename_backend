@@ -49,7 +49,7 @@ func main() {
 		}).Info("Received request")
 		c.Next()
 	})
-
+	// ROUTING PART ---------------------------------------------------------------------------------------------//
 	router.GET("/", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"message": "welcome to codename backend",
@@ -109,7 +109,7 @@ func main() {
 			"message": "Password changed successfully",
 		})
 	})
-	router.GET("/admin", auth.JWT_BASIC_AUTH(), admin.GetALLUSERS, func(c *gin.Context) {
+	router.GET("/admin", auth.JWT_BASIC_AUTH() , admin.GetALLUSERS, func(c *gin.Context) {
 		admin.GetALLUSERS(c)
 	})
 
@@ -129,6 +129,11 @@ func main() {
 	router.POST("/deleteuser", middlewares.UserDelete, func(c *gin.Context) {
 		middlewares.UserDelete(c)
 	})
+
+	// database PART ---------------------------------------------------------------------------------------------//
+
+
+
 	database.ConnectMongoDB()
 	database.ConnectRedisDB()
 

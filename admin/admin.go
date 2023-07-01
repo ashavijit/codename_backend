@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"os"
+	// "strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -64,16 +66,30 @@ func GetALLUSERS(c *gin.Context) {
 		})
 		return
 	}
-
-	err = ioutil.WriteFile(fileName, data, 0644)
+	// check file for today exist or not if exist then delete or dont write
+	checkfile , err := ioutil.ReadDir("data/" + "users_" + currentTimestamp + ".json")
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"message": "Failed to write data to file",
+			"message": "Failed to read file",
 		})
 		return
 	}
-
-	c.JSON(http.StatusOK, users)
+	if len(checkfile) != 0 {
+		err = os.Remove("data/" + "users_" + currentTimestamp + ".json")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"message": "Failed to remove file",
+			})
+			return
+		}
+	}
+	err = ioutil.WriteFile(fileName, data, 0644)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": "Failed to write file",
+		})
+		return
+	}
 }
 
 // func GetASingleUserFromID(c *gin.Context) {
@@ -131,5 +147,22 @@ func NewUsers(c *gin.Context) {
 		"yesterdayUser": usersYesterday,
 		"todayUser":     usersToday,
 		// "newUser":       newUser,
+	})
+}
+
+func CHECK_REQUEST_URL(c *gin.Context) {
+	AllowedOrigin := []string{
+		"http://localhost:3000",
+		"http://localhost:3001",
+	}
+	origin := c.Request.Header.Get("Origin")
+	for _, allowedOrigin := range AllowedOrigin {
+		if allowedOrigin == origin {
+			c.Next()
+			return
+		}
+	}
+	c.JSON(http.StatusUnauthorized, gin.H{
+		"message": "Invalid request",
 	})
 }

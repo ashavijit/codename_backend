@@ -35,4 +35,18 @@ import serviceAccountKeyFile from "../keys.json"
     return res.data;
   }
 
-  export {_getGoogleSheetClient, _readGoogleSheet, _writeGoogleSheet}
+  async function _getExistingSheetData(googleSheetClient: sheets_v4.Sheets, sheetId: string, tabName: string, range: string) {
+    const res = await googleSheetClient.spreadsheets.values.get({
+      spreadsheetId: sheetId,
+      range: `${tabName}!${range}`,
+    });
+  }
+
+  async function _clearGoogleSheetData(googleSheetClient: sheets_v4.Sheets, sheetId: string, tabName: string, range: string) {
+    const res = await googleSheetClient.spreadsheets.values.clear({
+      spreadsheetId: sheetId,
+      range: `${tabName}!${range}`,
+    });
+  }
+
+  export {_getGoogleSheetClient, _readGoogleSheet, _writeGoogleSheet, _getExistingSheetData , _clearGoogleSheetData }

@@ -84,13 +84,12 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // }
 const express_1 = __importDefault(require("express"));
 const axios_1 = __importDefault(require("axios"));
-const sheets_1 = require("./lib/sheets");
 const app = (0, express_1.default)();
 const port = 3000;
 const TOKEN = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiZXhwIjoxNjg4NjY2OTYwfQ.gKygcoudX2sDXo54kPCTXNnJtiwUczviCSmhgJqtAU4";
 const URL = "http://localhost:8080/admin";
 const sheetId = "19nwije38ve_YkzMkwY8lmDr7jKkjnXUSN6K4KFGey3s";
-const tabName = "Sheet1";
+const tabName = "Sheet2";
 const range = "A1:F6";
 app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: true }));
@@ -101,27 +100,17 @@ app.get("/", async (req, res) => {
 });
 app.get("/admin", async (req, res) => {
     try {
-        const response = await axios_1.default.get(URL, { headers: { "Content-Type": "application/json", Authorization: TOKEN } });
+        const response = await axios_1.default.get(URL, { headers: { Authorization: TOKEN } });
         if (response.status === 400) {
             return res.status(400).json({ error: "Bad Request" });
         }
         else if (response.status === 401) {
             return res.status(401).json({ error: "Unauthorized" });
         }
-        const jsonData = JSON.parse(JSON.stringify(response.data));
-        const fields = Object.keys(jsonData[0]);
-        const client = await (0, sheets_1._getGoogleSheetClient)();
-        const data = []; // Initialize data array
-        // Add header row with field names
-        const headerRow = fields.map((field) => [field]);
-        data.push(headerRow);
-        for (let i = 0; i < jsonData.length; i++) {
-            const row = fields.map((field) => jsonData[i][field]);
-            data.push(row);
-        }
-        const range = `A1:${String.fromCharCode(65 + fields.length)}${jsonData.length + 1}`; // Calculate the range dynamically starting from column A
-        const result = await (0, sheets_1._writeGoogleSheet)(client, sheetId, tabName, range, data);
-        return res.status(200).json({ message: "Success" });
+        const JSONDATA = JSON.parse(JSON.stringify(response.data));
+        console.log(JSONDATA);
+        const fields = Object.keys(JSONDATA["username"][0]);
+        console.log(fields);
     }
     catch (error) {
         console.log(error);
