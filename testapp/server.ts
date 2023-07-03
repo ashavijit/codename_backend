@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import express, { Application, Request, Response } from 'express';
 import { google, sheets_v4 } from 'googleapis';
 import axios from 'axios';
@@ -36,11 +37,10 @@ const headers = {
 
 axios.get(URL, { headers })
       .then(async response => {
-            const JSONDATA = JSON.parse( 
+            const JSONDATA = JSON.parse(
                   JSON.stringify(response.data)
             );
             console.log(JSONDATA);
-            
       })
       .catch(error => {
             console.log(error);
